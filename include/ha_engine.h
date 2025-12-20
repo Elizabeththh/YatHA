@@ -2,7 +2,7 @@
 #define HAENGINE_H
 
 #include "../third_party/cppjieba/Jieba.hpp"
-#include "../include/stop_words_manager.hpp"
+#include "../include/stop_words_manager.h"
 #include <iostream>
 #include <fstream>
 #include <queue>
@@ -31,18 +31,22 @@ class HaEngine
         const std::string outputFile{}; 
         std::ofstream out;                                          // 在构造函数中打开文件，而不是在 countTopKwords中打开，避免内容覆盖；
         int maxWindowSize{};                                      
-        int currTime = -1;                                         // 输入文件时间戳从0秒开始，初始时间戳设为 -1
+        int currTime = -1;                                          // 输入文件时间戳从0秒开始，初始时间戳设为 -1
         int curWindowSize{};
         int topK{};
+        std::unordered_set<std::string> filter{};        
+        std::unordered_set<std::string> chooser{};                   
         
         public:
         cppjieba::Jieba jieba;
         
         HaEngine(const std::string& dictPath, const std::string& hmmPath, const std::string& userDictPath, 
-                 const std::string& idfPath, const std::string& stopWordDictPath, int window, int k, 
-                 const std::string &i, const std::string &o);
+                 const std::string& idfPath, const std::string& stopWordDictPath, int window, int k, std::unordered_set<std::string>& ftr,
+                 std::unordered_set<std::string>& chsr, const std::string &i, const std::string &o);
         void cutWordsTest();
         void cutWord();
+        void cutWordFilter();
+        void cutWordChooser();
         void writeOutput();
         bool readUtf8Lines(std::vector<std::string>& lines);
         void testOutput();

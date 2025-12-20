@@ -1,13 +1,15 @@
 #include "../third_party/cppjieba/Jieba.hpp"
-#include "../include/ha_engine.hpp"
+#include "../third_party/cppjieba/limonp/ArgvContext.hpp"
+#include "../include/ha_engine.h"
 #include <iostream>
 
 
-const std::string DICT_PATH             =     "data/dict/jieba.dict.utf8";
-const std::string HMM_PATH              =     "data/dict/hmm_model.utf8";
-const std::string USER_DICT_PATH        =     "data/dict/user.dict.utf8";
-const std::string IDF_PATH              =     "data/dict/idf.utf8";
-const std::string STOP_WORD_DICT_PATH   =     "data/dict/stop_words.utf8";
+const std::string DICT_PATH                =     "dict/jieba.dict.utf8";
+const std::string HMM_PATH                 =     "dict/hmm_model.utf8";
+const std::string USER_DICT_PATH           =     "dict/user.dict.utf8";
+const std::string IDF_PATH                 =     "dict/idf.utf8";
+const std::string STOP_WORD_DICT_PATH      =     "dict/stop_words.utf8";
+// const std::string SENSITIVE_WORD_PATH      =     "dict/sensitive_words.utf8";
 
 
 
@@ -19,23 +21,11 @@ int main(int argc, char* argv[])
     // 默认参数
     int topK = 3;
     int windowSize = 600;
-    if(argc == 3)
-    {
-        inputFile = argv[1];
-        outputFile = argv[2];
-    }
-    else if(argc == 4)
-    {
-        inputFile = argv[1];
-        outputFile = argv[2];
-        windowSize = std::stoi(argv[3]);
-    }
-    else
-    {
-        std::cout << "请提供正确的输入输出文件\n";
-        std::cout << "用法：./yatha <输入文件路径> <输出文件路径> （可选，默认时间窗口长度为600s）<时间窗口长度（单位：秒）>\n";
-    }
+    std::unordered_set<std::string> filter{};
+    std::unordered_set<std::string> chooser{};
     
+    limonp::ArgvContext arg(argc, argv);
+    arg.ReadArgv(inputFile, outputFile, windowSize, topK, filter, chooser);
 
     std::ofstream out(outputFile, std::ios::binary);
     if (!out.is_open()) {
@@ -43,9 +33,15 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    HaEngine ha(DICT_PATH, HMM_PATH, USER_DICT_PATH, IDF_PATH, STOP_WORD_DICT_PATH, windowSize, topK, inputFile, outputFile);
-    ha.jieba.DeleteUserWord("技术创新");
-    ha.cutWord();
+    HaEngine ha(DICT_PATH, HMM_PATH, USER_DICT_PATH, IDF_PATH, STOP_WORD_DICT_PATH, windowSize, topK, filter, chooser, inputFile, outputFile);
+    if(filter.size() == 0 && chooser.size() == 0)
+        ha.cutWord();
+    else if(filter.size() != 0)
+        ha.cutWordFilter();
+    else if(chooser.size() != 0)
+        ha.cutWordChooser();
+    else
+        ha.cutWord();
     // ha.cutWordsTest();
     // ha.testOutput();
 }

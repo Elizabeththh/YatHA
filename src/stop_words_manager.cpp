@@ -1,4 +1,5 @@
-#include "../include/stop_words_manager.hpp"
+#include "../include/stop_words_manager.h"
+#include <iostream>
 
 StopWordsManager::StopWordsManager(const std::string& stopWordsDict)
 {
