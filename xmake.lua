@@ -13,6 +13,7 @@ target("yatha")
     set_rundir("$(projectdir)")
     set_runargs("input1.txt", "output.txt")
     
+    -- 确保跨平台正确编译
     if is_plat("windows") then 
         add_cxflags("/utf-8", {tools = "cl"})
         add_cxflags("-finput-charset=UTF-8", "-fexec-charset=UTF-8", {tools = {"gcc", "clang"}})
