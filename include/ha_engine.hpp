@@ -11,6 +11,7 @@
 #include <unordered_set>
 #include <utility>
 #include <iomanip>
+#include <string>
 
 
 using Tword = std::pair<int, std::string>;
@@ -37,7 +38,9 @@ class HaEngine
         public:
         cppjieba::Jieba jieba;
         
-        HaEngine(int window, int k, const std::string& i, const std::string& o);
+        HaEngine(const std::string& dictPath, const std::string& hmmPath, const std::string& userDictPath, 
+                 const std::string& idfPath, const std::string& stopWordDictPath, int window, int k, 
+                 const std::string &i, const std::string &o);
         void cutWordsTest();
         void cutWord();
         void writeOutput();

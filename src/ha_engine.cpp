@@ -1,13 +1,11 @@
 #include "../include/ha_engine.hpp"
 #include "../include/stop_words_manager.hpp"
 // 初始化 jieba 和 swmanager
-HaEngine::HaEngine(int window, int k, const std::string &i, const std::string &o) : 
-jieba("../data/dict/jieba.dict.utf8",
-      "../data/dict/hmm_model.utf8",
-      "../data/dict/user.dict.utf8",
-      "../data/dict/idf.utf8",
-      "../data/dict/stop_words.utf8"),
-swManager("../data/dict/stop_words.utf8"),
+HaEngine::HaEngine(const std::string& dictPath, const std::string& hmmPath, const std::string& userDictPath, 
+                   const std::string& idfPath, const std::string& stopWordDictPath, int window, int k, 
+                   const std::string &i, const std::string &o) : 
+jieba(dictPath, hmmPath, userDictPath, idfPath, stopWordDictPath),
+swManager(stopWordDictPath),
 maxWindowSize(window), topK(k), inputFile(i), outputFile(o) { out.open(outputFile, std::ios::binary); }
 
 void HaEngine::cutWord()
@@ -25,7 +23,7 @@ void HaEngine::cutWord()
         const std::string &sentence = lines[idx];
         if (sentence[1] != 'A')
         {
-            int timeSec = (sentence[1] - '0') * 3600 + stoi(sentence.substr(3, 2)) * 60 + stoi(sentence.substr(6, 2));
+            int timeSec = (sentence[1] - '0') * 3600 + std::stoi(sentence.substr(3, 2)) * 60 + std::stoi(sentence.substr(6, 2));
 
             std::vector<std::string> word;
             jieba.Cut(sentence.substr(10), word, true);
@@ -67,7 +65,7 @@ void HaEngine::cutWord()
 
         else
         {
-            topK = stoi(sentence.substr(17));
+            topK = std::stoi(sentence.substr(17));
             countTopKWords(out);
         }
     }
@@ -125,7 +123,7 @@ void HaEngine::cutWordsTest()
         const std::string &sentence = lines[idx];
         if(sentence[1] != 'A')
         {
-            int timeSec = (sentence[1] - '0') * 3600 + (stoi(sentence.substr(3, 2)) % 3600) * 60 + stoi(sentence.substr(6, 2)) % 3600;
+            int timeSec = (sentence[1] - '0') * 3600 + (std::stoi(sentence.substr(3, 2)) % 3600) * 60 + std::stoi(sentence.substr(6, 2)) % 3600;
 
             std::vector<std::string> word;
             jieba.Cut(sentence.substr(10), word, true);
