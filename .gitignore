@@ -5,3 +5,5 @@ build/
 .xmake
 bin/
 output.txt
+data/temp_input.txt
+data/temp_output.txt
