@@ -55,17 +55,27 @@ class ArgvContext {
     return false;
   }
 
-  void ReadArgv(std::string& Input, std::string& Output, int& Windows, int& TopK, std::unordered_set<std::string>& ftr, std::unordered_set<std::string>& csr)
+  void ReadArgv(std::string& Input, std::string& Output, int& Windows, int& TopK, std::unordered_set<std::string>& ftr, std::unordered_set<std::string>& csr, bool& isServer)
   {
     if(this->HasKey("-h"))
     {
       PrintHelp();
       exit(0);
     }
+    if(this->HasKey("-s"))
+    {
+      isServer = true;
+      return;
+    }
     if(this->HasKey("-wc"))
     {
       PrintPOSHelp();
       exit(0);
+    }
+    if(this->HasKey("-s"))
+    {
+      isServer = true;
+      return;
     }
     if(this->HasKey("-i"))
     {

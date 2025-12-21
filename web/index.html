@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>YATHA 热词分析系统</title>
+    <style>
+        body 
+        {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        h1 
+        {
+            color: #333;
+            text-align: center;
+        }
+
+        .container 
+        {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-area 
+        {
+            border: 2px dashed #ddd;
+            padding: 40px;
+            text-align: center;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+        }
+
+        .upload-area:hover 
+        {
+            border-color: #007bff;
+        }
+
+        #fileInput 
+        {
+            display: none;
+        }
+
+        .btn 
+        {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            display: inline-block;
+        }
+
+        .btn:hover 
+        {
+            background-color: #0056b3;
+        }
+
+        #result 
+        {
+            margin-top: 20px;
+            white-space: pre-wrap;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+            min-height: 100px;
+        }
+
+        .loading 
+        {
+            color: #666;
+            font-style: italic;
+        }
+
+        .error 
+        {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div style="text-align: center;">
+            <a href="https://arcsysu.tech/"><img src="/img/arx-logo.webp" alt="Logo" style="max-width: 200px;"></a>
+        </div>
+        <h1>YATHA 热词分析</h1>
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+            <p>点击上传文件或拖拽文件到此处</p>
+            <p style="font-size: 0.8em; color: #888;">支持 .txt 格式</p>
+            <input type="file" id="fileInput" accept=".txt">
+        </div>
+
+        <h3>分析结果:</h3>
+        <div id="result">请上传文件以查看分析结果...</div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const resultDiv = document.getElementById('result');
+        const uploadArea = document.querySelector('.upload-area');
+
+        // Handle file selection
+        fileInput.addEventListener('change', function (e) 
+        {
+            if (e.target.files.length > 0) 
+                analyzeFile(e.target.files[0]);
+        });
+
+        // Handle drag and drop
+        uploadArea.addEventListener('dragover', (e) => 
+        {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#007bff';
+        });
+
+        uploadArea.addEventListener('dragleave', (e) => 
+        {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#ddd';
+        });
+
+        uploadArea.addEventListener('drop', (e) => 
+        {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#ddd';
+            if (e.dataTransfer.files.length > 0)
+                analyzeFile(e.dataTransfer.files[0]);
+        });
+
+        async function analyzeFile(file) 
+        {
+            resultDiv.innerHTML = '<span class="loading">正在分析 ' + file.name + ' ...</span>';
+
+            try 
+            {
+                const response = await fetch('/api/analyze', 
+                {
+                    method: 'POST',
+                    headers: 
+                    {
+                        'Content-Type': 'text/plain' // Sending raw content
+                    },
+                    body: file
+                });
+
+                if (!response.ok) 
+                    throw new Error('请确保上传了正确格式的文件');
+                const data = await response.text();
+                resultDiv.textContent = data;
+            } 
+            catch (error) 
+            {
+                resultDiv.innerHTML = '<span class="error">分析失败: ' + error.message + '</span>';
+            }
+        }
+    </script>
+</body>
+
+</html>
