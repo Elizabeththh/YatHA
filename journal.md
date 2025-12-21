@@ -240,7 +240,7 @@ void ReadArgv(std::string& Input, std::string& Output, int& Windows, int& TopK, 
   }
 ```
 2. 查阅cppjieba库资料得到词性对照表，根据用户输入来选择**过滤/放行**属于某种词性的词语
-==（敏感词过滤功能因为测试文本**不方便**生成，所以改做词性筛选）==
+（敏感词过滤功能因为测试文本**不方便**生成，所以改做词性筛选）
 由于cppjieba库本身实现对某些词语的识别就不太准确，如“刘备”竟然被归为音译人名所以**是否精准地筛选/放行某类词性的词语不在考虑范围内**，这里只注重算法设计
 
 在 `HaEngin` 类里分别维护无序集 `filter`, `chooser` 用来确定需要过滤/放行的词性，再对原来的 `cutWords()`函数稍加修改即可实现功能
@@ -321,6 +321,114 @@ if (!swManager.isStopWord(wordWithCls[i].first) && filter.find(wordWithCls[i].se
     svr.set_mount_point("/img", "../img");
   ```
 
+## v0.8 代码重构
+当我准备在Web GUI 中新增滚动查询功能的时候，发现 `HaEngine` 非常臃肿，几乎所有功能都是在这个类中实现的。为了保证代码的可读性和减少未来不必要的调试麻烦，同时减少编译~~坐牢~~时间（如果函数都实现在一个类中，那么每一次小变动都会导致项目主要文件的重新编译，会**极大地提升不幸福感**，大作业要赶不完了），决定重构代码！
 
+### 原来的 `HaEngine` 类：
+```cpp
+class HaEngine
+{
+    private:
+        std::queue<Tword> historyQueue;                            // 记录当前时间窗口的词语
+        std::unordered_map<std::string, int> freqMap;              // 记录当前时间窗口词语的频次
+        std::set<Tword> rankingSet;                                // 按词语出现频次升序排列集合
 
+        std::vector<std::string> lines;
+        std::vector<Tword> words;
+        StopWordsManager swManager;
+        
+        
+        const std::string inputFile{};
+        const std::string outputFile{}; 
+        std::ofstream out;                                          // 在构造函数中打开文件，而不是在 countTopKwords中打开，避免内容覆盖；
+        int maxWindowSize{};                                      
+        int currTime = -1;                                          // 输入文件时间戳从0秒开始，初始时间戳设为 -1
+        int curWindowSize{};
+        int topK{};
+        std::unordered_set<std::string> filter{};        
+        std::unordered_set<std::string> chooser{};                   
+        
+        public:
+        cppjieba::Jieba jieba;
+        
+        HaEngine(const std::string& dictPath, const std::string& hmmPath, const std::string& userDictPath, 
+                 const std::string& idfPath, const std::string& stopWordDictPath, int window, int k, std::unordered_set<std::string>& ftr,
+                 std::unordered_set<std::string>& chsr, const std::string &i, const std::string &o);
+        void cutWordsTest();
+        void cutWord();
+        void cutWordFilter();
+        void cutWordChooser();
+        void writeOutput();
+        bool readUtf8Lines(std::vector<std::string>& lines);
+        void testOutput();
+        void removeOutdatedWords();
+        void countTopKWords(std::ofstream& out);
 
+};
+```
+可以看到包括1）时间窗口管理，2）TopK 排行榜管理等功能的有关变量和函数统统挤在了这个类里，看得头晕。
+
+### 重构代码！
+`HaEngine` 作为总调度器，将原来的时间窗口管理、TopK排行榜管理分别分离到`TimeWindowManager`类和`WordRanker`类中
+```cpp
+class WordRanker
+{
+    private:
+        std::unordered_map<std::string, int> freqMap; // 词频映射
+        std::set<Tword> rankingSet;                   // 按频次排序的集合 (freq, word)
+
+    public:
+        WordRanker() = default;
+
+        // 添加一个词（词频+1）
+        void addWord(const std::string &word);
+
+        // 移除一个词（词频-1，如果为0则完全删除）
+        void removeWord(const std::string &word);
+
+        // 获取TopK词汇
+        std::vector<std::pair<std::string, int>> getTopK(int k) const;
+
+        // 获取排名集合（用于输出格式化）
+        const std::set<Tword> &getRankingSet() const { return rankingSet; }
+};
+```
+
+```cpp
+class TimeWindowManager
+{
+    private:
+        std::queue<Tword> historyQueue;  // 存储所有在窗口内的词
+        int maxWindowSize;               // 最大窗口大小
+        int currTime = -1;               // 当前时间戳
+        int curWindowSize = 0;           // 当前窗口大小
+
+    public:
+        TimeWindowManager(int windowSize);
+        
+        // 判断是否需要移除过期词
+        bool shouldRemoveOld(int newTime);
+        
+        // 获取并移除过期的词（返回需要删除的词列表）
+        std::vector<Tword> getAndRemoveOutdatedWords();
+        
+        // 添加新词到窗口
+        void addWord(int timestamp, const std::string& word);
+        
+        // Getter方法
+        int getCurrentTime() const { return currTime; }
+        int getCurrentWindowSize() const { return curWindowSize; }
+        bool isEmpty() const { return historyQueue.empty(); }
+};
+```
+重构之后的好处：
+1. **单一职责**
+每个类只负责一件事：`TimeWindowManager` 管理时间窗口，`WordRanker` 管理词频排名，`HaEngine` 负责协调调度。代码职责清晰，可读性更强了，易于维护
+
+2. **降低耦合度**
+各模块相对独立，接口明确。且修改一个模块的内部实现不会影响其他模块
+
+3. **减少编译时间**（主要！！）
+假如想修改 `WordRanker` 的实现时，只需重新编译 `word_ranker.cpp` 及依赖它的文件，而不会触发整个项目的重新编译，节省时间（天生打工圣体，太好了剩余价值又能被充分压榨了）
+
+4. **便于功能扩展**
