@@ -1,5 +1,6 @@
 ## v0.1 完成基础滑动窗口热词统计功能
-1. **输出文件每次都被覆盖的问题**
+### 遇到的问题
+#### 1. **输出文件每次都被覆盖的问题**
 ```cpp
         std::ofstream out(outputFile, std::ios::binary);
         countTopKWords(out);
@@ -35,7 +36,7 @@ swManager("../data/dict/stop_words.utf8"),
 max_window_size(window), top_k(k), inputFile(i), outputFile(o) { out.open(outputFile, std::ios::binary); }
 ```
 
-2. **同一时间戳多条数据触发重复删除导致词频异常**
+#### 2. **同一时间戳多条数据触发重复删除导致词频异常**
 ```cpp
 // 错误代码
 else
@@ -75,8 +76,6 @@ else
     }
 }
 ```
-
-   - **核心思想**：滑动窗口的删除操作应该以时间戳为单位，而不是以单条数据为单位只有当新的时间戳到来时，才删除最早时间戳的所有数据，保证窗口始终维持600秒的长度
 
 ## v0.2 规范化命名，引入 Xmake 支持跨平台编译，支持基本 CLI 
 ### 人生苦短，我选 Xmake
@@ -141,9 +140,9 @@ add_custom_target(run
     COMMENT "Running yatha with default arguments..."
 )
 ```
-1. 可读性强
+1. **可读性强**
 lua 是一门脚本语言，语法简洁直观比起 `CmakeLists.txt` 中一会大写一会小写，各种何意味的宏定义，xmake 的语法绝对是**小葱拌豆腐——一清二白了**
-2. 构建流程简单
+2. **构建流程简单**
 Cmake 通常需要
 ```shell
 mkdir build 
@@ -166,7 +165,7 @@ end
 ```
 
 ### 扩展命令行参数选项，实现词性筛选功能
-1. 发现 cppjieba 库的作者在 `limonp` 文件夹中偷偷实现了很多很好用的工具函数
+#### 1. **发现 cppjieba 库的作者在 `limonp` 文件夹中偷偷实现了很多很好用的工具函数**
 
 比如 `ArgvContext.hpp` 就是一个用来处理命令行参数的类
 
@@ -239,7 +238,7 @@ void ReadArgv(std::string& Input, std::string& Output, int& Windows, int& TopK, 
     }
   }
 ```
-2. 查阅cppjieba库资料得到词性对照表，根据用户输入来选择**过滤/放行**属于某种词性的词语
+#### 2. 查阅cppjieba库资料得到词性对照表，根据用户输入来选择**过滤/放行**属于某种词性的词语
 （敏感词过滤功能因为测试文本**不方便**生成，所以改做词性筛选）
 由于cppjieba库本身实现对某些词语的识别就不太准确，如“刘备”竟然被归为音译人名所以**是否精准地筛选/放行某类词性的词语不在考虑范围内**，这里只注重算法设计
 
@@ -320,11 +319,18 @@ if (!swManager.isStopWord(wordWithCls[i].first) && filter.find(wordWithCls[i].se
     svr.set_mount_point("/", "../web");
     svr.set_mount_point("/img", "../img");
   ```
+- **问题4：拖放功能默认行为**
+  - 原因：浏览器默认会对某一些行为做处理。如把文本文件拖进浏览器，默认行为是打开并显示。
+  - 解决办法：
+  ```cpp
+  e.preventDefault();
+  ```
+  调用`preventDefault()`方法阻止默认行为。
 
 ## v0.8 代码重构
 当我准备在Web GUI 中新增滚动查询功能的时候，发现 `HaEngine` 非常臃肿，几乎所有功能都是在这个类中实现的。为了保证代码的可读性和减少未来不必要的调试麻烦，同时减少编译~~坐牢~~时间（如果函数都实现在一个类中，那么每一次小变动都会导致项目主要文件的重新编译，会**极大地提升不幸福感**，大作业要赶不完了），决定重构代码！
 
-### 原来的 `HaEngine` 类：
+### 1. 原来的 `HaEngine` 类：
 ```cpp
 class HaEngine
 {
@@ -368,7 +374,7 @@ class HaEngine
 ```
 可以看到包括1）时间窗口管理，2）TopK 排行榜管理等功能的有关变量和函数统统挤在了这个类里，看得头晕。
 
-### 重构代码！
+### 2. 重构代码！
 `HaEngine` 作为总调度器，将原来的时间窗口管理、TopK排行榜管理分别分离到`TimeWindowManager`类和`WordRanker`类中
 ```cpp
 class WordRanker
@@ -432,3 +438,145 @@ class TimeWindowManager
 假如想修改 `WordRanker` 的实现时，只需重新编译 `word_ranker.cpp` 及依赖它的文件，而不会触发整个项目的重新编译，节省时间（天生打工圣体，太好了剩余价值又能被充分压榨了）
 
 4. **便于功能扩展**
+
+## v1.0 将词性过滤/放行功能整合入 Web GUI 界面
+### 1. 提供两个新的接口 `/api/analyze-filter` 和 `/api/analyzer-chooser`
+因为原来已经实现了 `cutWordFiter()` 和 `cutWordChooser()` 函数，所以只需要提供两个新的接口供前端请求即可。
+```cpp
+svr.Post("/api/analyze-filter", [](const httplib::Request &req, httplib::Response &res{}));
+svr.Post("/api/analyze-chooser", [](const httplib::Request &req, httplib::Response &res){});
+```
+
+### 2. 前端新增一个词性选择表，为用户提供词性过滤/放行功能
+![](/img/fiter.png)
+前端会根据所选模式来请求不同的接口：
+```cpp
+// 根据模式选择API端点
+let apiUrl = '/api/analyze';
+if (posConfig.mode === 'filter' && posConfig.pos.length > 0) {
+    apiUrl = '/api/analyze-filter';
+} else if (posConfig.mode === 'allow' && posConfig.pos.length > 0) {
+    apiUrl = '/api/analyze-chooser';
+}
+
+// 准备请求体
+const fileContent = await file.text();
+
+let response;
+if(apiUrl === '/api/analyze')
+{
+    response = await fetch(apiUrl, 
+    {
+        method: 'POST',
+        headers: 
+        {
+            'Content-Type': 'text/plain' 
+        },
+        body: fileContent
+    });
+}
+else
+{
+    response = await fetch(apiUrl,
+    {
+        method: 'POST',
+        headers:
+        {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            content: fileContent,
+            pos: posConfig.pos.join(',')
+        })
+    });
+}
+```
+### 遇到的问题
+#### 1. JSON 文件格式处理问题
+`/api/analyzer-...`
+```cpp
+// 1. 提取 content 字段
+size_t contentStart = jsonBody.find("\"content\":\"") + 12;
+size_t contentEnd = jsonBody.find("\"", contentStart);
+std::string inputContent = jsonBody.substr(contentStart, contentEnd - contentStart);
+
+// 2. 提取 pos 字段
+size_t posStart = jsonBody.find("\"pos\":\"") + 7;
+size_t posEnd = jsonBody.find("\"", posStart);
+std::string posString = jsonBody.substr(posStart, posEnd - posStart);
+```
+发现前端无法分析，只提示：[xx模式：xx]
+查看生成的`temp_chooser_output.txt`文件，发现原因出在没有正确处理字符串中的换行符`\n`；
+
+解决办法：
+```cpp
+std::string inputContent;
+for (size_t i = contentStart; i < jsonBody.length(); i++) {
+    if (jsonBody[i] == '\\' && i + 1 < jsonBody.length()) 
+    {
+        if (jsonBody[i + 1] == 'n') { inputContent += '\n'; i++; }
+        else if (jsonBody[i + 1] == 't') { inputContent += '\t'; i++; }
+        else if (jsonBody[i + 1] == '\"') { inputContent += '\"'; i++; }
+        else if (jsonBody[i + 1] == '\\') { inputContent += '\\'; i++; }
+        else inputContent += jsonBody[i];
+    } 
+    else if (jsonBody[i] == '\"' && (i == 0 || jsonBody[i-1] != '\\')) 
+        break; // 找到content字段的结束引号
+    else 
+        inputContent += jsonBody[i];
+}
+```
+建立一个循环来正确处理 JSON 数据中的换行符。
+
+##### 反思：
+不过滤模式下，只需要返回文本即可，格式是`text/plain`，这是纯文本文件，不需要处理换行符。但是对于 JSON 字符串，就需要处理换行符了。
+
+#### 2. 不过滤模式下无法正常分析文本
+检查`index.html`发现，不论是过滤/放行模式还是不过滤模式，http请求头的body都变成了 JSON 字符串
+```cpp
+response = await fetch(apiUrl,
+          {
+              method: 'POST',
+              headers:
+              {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                  content: fileContent,
+                  pos: posConfig.pos.join(',')
+              })
+          });
+```
+解决办法：添加一个条件判断，若是不过滤模式，则body为`text/plain`，否则为`application/json`
+```cpp
+let response;
+if(apiUrl === '/api/analyze')
+{
+    response = await fetch(apiUrl, 
+    {
+        method: 'POST',
+        headers: 
+        {
+            'Content-Type': 'text/plain' 
+        },
+        body: fileContent
+    });
+}
+else
+{
+    response = await fetch(apiUrl,
+    {
+        method: 'POST',
+        headers:
+        {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            content: fileContent,
+            pos: posConfig.pos.join(',')
+        })
+    });
+}
+```
+
+
