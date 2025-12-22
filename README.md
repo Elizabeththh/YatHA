@@ -10,7 +10,7 @@ YATHA 是一个能够根据输入的特定格式文件在指定的时间窗口�
 ## v0.8 代码重构
 ## v1.0 将词性过滤/放行功能整合到 Web GUI 中
 ## v1.1 引入 nlohmann/json 库处理 JSON 数据
-## v1.7 在 Web GUI 界面
+## v1.7 在 Web GUI 界面 增加滚动查询功能
 ---
 
 ## TODO
