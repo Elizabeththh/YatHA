@@ -4,239 +4,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>YATHA 热词分析系统</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
+    
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- 引入Chart.js图表库 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- 引入词云库 -->
+    <script src="https://cdn.jsdelivr.net/npm/wordcloud@1.2.2/src/wordcloud2.min.js"></script>
 
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .upload-area {
-            border: 2px dashed #ddd;
-            padding: 40px;
-            text-align: center;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-bottom: 20px;
-            transition: border-color 0.3s;
-        }
-
-        .upload-area:hover {
-            border-color: #007bff;
-        }
-
-        #fileInput {
-            display: none;
-        }
-
-        .btn {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            display: inline-block;
-        }
-
-        .btn:hover {
-            background-color: #0056b3;
-        }
-
-        .btn:active {
-            transform: scale(0.98);
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn:disabled {
-            background-color: #6c757d;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-
-        #result {
-            margin-top: 20px;
-            white-space: pre-wrap;
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 4px;
-            border: 1px solid #e9ecef;
-            min-height: 100px;
-        }
-
-        .loading {
-            color: #666;
-            font-style: italic;
-        }
-
-        .error {
-            color: red;
-        }
-
-        /* 词性过滤选项样式 */
-        .pos-filter-section {
-            margin: 20px 0;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
-        }
-
-        .mode-selector {
-            margin-bottom: 15px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .mode-selector label {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            cursor: pointer;
-            padding: 8px 15px;
-            background: white;
-            border: 2px solid #ddd;
-            border-radius: 4px;
-            transition: all 0.3s;
-        }
-
-        .mode-selector input[type="radio"]:checked+label {
-            background: #007bff;
-            color: white;
-            border-color: #007bff;
-        }
-
-        .mode-selector input[type="radio"] {
-            display: none;
-        }
-
-        .pos-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .pos-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 10px;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 14px;
-        }
-
-        .pos-item:hover {
-            background: #f0f8ff;
-            border-color: #007bff;
-        }
-
-        .pos-item input[type="checkbox"] {
-            cursor: pointer;
-        }
-
-        .pos-category {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #ddd;
-        }
-
-        .pos-category-title {
-            font-weight: bold;
-            color: #555;
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
-
-        .quick-select {
-            margin: 10px 0;
-            display: flex;
-            gap: 10px;
-        }
-
-        .quick-select button {
-            padding: 5px 12px;
-            font-size: 13px;
-            background: #6c757d;
-            border: none;
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .quick-select button:hover {
-            background: #5a6268;
-        }
-
-        .collapse-header {
-            cursor: pointer;
-            user-select: none;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background: #e9ecef;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-
-        .collapse-header:hover {
-            background: #dee2e6;
-        }
-
-        .collapse-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
-
-        .collapse-content.expanded {
-            max-height: 1300px;
-        }
-    </style>
 </head>
 
 <body>
-    <div class="container">
-        <div style="text-align: center;">
-            <a href="https://arcsysu.github.io/arcsysu/"><img src="/img/arx-logo.webp" alt="Logo" style="max-width: 200px;"></a>
-        </div>
+    <!-- Logo和标题 -->
+    <div style="text-align: center; margin-bottom: 20px;">
         <h1>YATHA 热词分析</h1>
-        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-            <p>点击上传文件或拖拽文件到此处</p>
-            <p style="font-size: 0.8em; color: #888;">支持 .txt 格式</p>
-            <input type="file" id="fileInput" accept=".txt">
+    </div>
+
+    <!-- Tab切换容器 -->
+    <div class="tab-container">
+        <div class="tab-header">
+            <button class="tab-btn active" onclick="switchTab('direct')">直接分析</button>
+            <button class="tab-btn" onclick="switchTab('rolling')">滚动分析</button>
         </div>
 
-        <div id="fileStatus" style="margin: 15px 0; color: #666; display: none;">
-            <p>文件就绪: <span id="fileName"></span></p>
-        </div>
+        <!-- Tab 1: 直接分析 (原有功能) -->
+        <div id="directTab" class="tab-content active">
+            <div class="container">
+                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                    <p>点击上传文件或拖拽文件到此处</p>
+                    <p style="font-size: 0.8em; color: #888;">支持 .txt 格式</p>
+                    <input type="file" id="fileInput" accept=".txt">
+                </div>
 
-        <button id="analyzeBtn" class="btn" style="display: none; margin-bottom: 20px; background-color: #28a745; font-size: 18px; padding: 12px 30px;" onclick="startAnalysis()">
-            开始分析
-        </button>
+                <div id="fileStatus" style="margin: 15px 0; color: #666; display: none;">
+                    <p>文件就绪: <span id="fileName"></span></p>
+                </div>
+
+                <button id="analyzeBtn" class="btn btn-success" style="display: none; margin-bottom: 20px; font-size: 18px; padding: 12px 30px;" onclick="startAnalysis()">
+                    开始分析
+                </button>
 
         <!-- 词性过滤选项 -->
         <div class="pos-filter-section">
@@ -259,11 +67,14 @@
                     <label for="modeAllow">放行模式</label>
                 </div>
 
-                <!-- 快速选择 -->
-                <div class="quick-select">
-                    <button onclick="selectAllPos()">全选</button>
-                    <button onclick="deselectAllPos()">清空</button>
-                </div>
+                        <!-- 快速选择 -->
+                        <div class="quick-select">
+                            <button onclick="selectAllPos()">全选</button>
+                            <button onclick="deselectAllPos()">清空</button>
+                        </div>
+
+                        <!-- 词性分类 -->
+                        <div id="directPosCategories">
 
                 <!-- 名词类 -->
                 <div class="pos-category">
@@ -393,16 +204,287 @@
                         <label class="pos-item"><input type="checkbox" class="pos-checkbox" value="g"> g - 语素</label>
                         <label class="pos-item"><input type="checkbox" class="pos-checkbox" value="eng"> eng -
                             英文/外语</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>分析结果:</h3>
+                <div id="result">请上传文件以查看分析结果...</div>
+            </div>
+        </div>
+
+        <!-- Tab 2: 滚动分析 -->
+        <div id="rollingTab" class="tab-content">
+            <div class="container">
+                <div class="rolling-layout">
+                    <!-- 时间轴显示 -->
+                    <div class="timeline-display">
+                        <div style="font-size: 14px; opacity: 0.9;">当前时间</div>
+                        <div class="time-value" id="currentTime">00:00:00</div>
+                        <div class="window-info">
+                            窗口大小: <span id="displayWindowSize">60</span>秒
+                        </div>
+                    </div>
+                    
+                    <!-- 图表展示区（柱状图和词云图左右分布） -->
+                    <div class="charts-container">
+                        <!-- 左侧柱状图 -->
+                        <div class="chart-wrapper">
+                            <h3 style="text-align: center; margin-bottom: 15px; color: #333;">TopK 热词排行榜</h3>
+                            <canvas id="wordFreqChart"></canvas>
+                        </div>
+                        
+                        <!-- 右侧词云图 -->
+                        <div class="wordcloud-wrapper">
+                            <h3 style="text-align: center; margin-bottom: 15px; color: #333;">词云可视化</h3>
+                            <canvas id="wordCloudCanvas" width="1200" height="600" style="width: 100%; border: 1px solid #ddd; border-radius: 8px; background: white;"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- 下方控制面板 -->
+                    <div class="rolling-control-panel">
+                        <h3>控制面板</h3>
+                        
+                        <div class="control-grid">
+                            <!-- 文件上传 -->
+                            <div class="control-group">
+                                <div class="rolling-upload-area" onclick="document.getElementById('rollingFileInput').click()">
+                                    <p>上传文件</p>
+                                    <p style="font-size: 0.8em; color: #888;">.txt 格式</p>
+                                    <input type="file" id="rollingFileInput" accept=".txt">
+                                </div>
+                                <div id="rollingFileStatus" style="display: none;">
+                                    文件: <span id="rollingFileName"></span>
+                                    <span class="status-badge ready">就绪</span>
+                                </div>
+                            </div>
+
+                            <!-- 时间窗口设置 -->
+                            <div class="control-group">
+                                <label for="windowSize">时间窗口 (秒)</label>
+                                <input type="number" id="windowSize" value="60" min="1" max="3600" placeholder="60">
+                                <small style="color: #888;">在分析开始后不可更改</small>
+                            </div>
+
+                            <!-- TopK设置 -->
+                            <div class="control-group">
+                                <label for="topKInput">TopK 数量</label>
+                                <input type="number" id="topKInput" value="10" min="1" max="50" placeholder="10">
+                                <small style="color: #888;">在分析开始后不可更改</small>
+                            </div>
+
+                            <!-- 时间步长 -->
+                            <div class="control-group">
+                                <label for="playSpeed">时间步长(秒)</label>
+                                <input type="number" id="playSpeed" value="1" min="1" max="3600" placeholder="1">
+                                <small style="color: #888;">在分析开始后不可更改</small>
+                            </div>
+
+                            <!-- 词性过滤 -->
+                            <div class="control-group">
+                                <label>词性过滤</label>
+                                <button class="pos-config-btn" onclick="openRollingPosModal()">
+                                    <span id="rollingPosConfigText">不过滤</span>
+                                    <span class="pos-config-status" id="rollingPosConfigStatus">点击配置</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 控制按钮 -->
+                        <div class="control-buttons">
+                            <button id="startRolling" class="btn btn-success" onclick="startRollingAnalysis()">
+                                开始滚动分析
+                            </button>
+                            <button id="stopRolling" class="btn btn-danger" onclick="stopRollingAnalysis()" disabled>
+                                停止分析
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <h3>分析结果:</h3>
-        <div id="result">请上传文件以查看分析结果...</div>
+    <!-- 滚动分析词性过滤模态框 -->
+    <div id="rollingPosModal" class="modal-overlay" onclick="closeRollingPosModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3>词性过滤设置</h3>
+                <button class="modal-close" onclick="closeRollingPosModal()">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- 模式选择 -->
+                <div class="mode-selector">
+                    <span style="font-weight: bold;">模式：</span>
+                    <input type="radio" name="rollingFilterMode" id="rollingModeNone" value="none" checked>
+                    <label for="rollingModeNone">不过滤</label>
+
+                    <input type="radio" name="rollingFilterMode" id="rollingModeFilter" value="filter">
+                    <label for="rollingModeFilter">过滤模式</label>
+
+                    <input type="radio" name="rollingFilterMode" id="rollingModeAllow" value="allow">
+                    <label for="rollingModeAllow">放行模式</label>
+                </div>
+
+                <!-- 快速选择 -->
+                <div class="quick-select">
+                    <button onclick="selectAllRollingPos()">全选</button>
+                    <button onclick="deselectAllRollingPos()">清空</button>
+                </div>
+
+                <!-- 词性分类 - 完整版 -->
+                <div id="rollingPosCategories">
+                    <!-- 名词类 -->
+                    <div class="pos-category">
+                        <div class="pos-category-title">名词类</div>
+                        <div class="pos-grid">
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="n"> n - 名词</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="nr"> nr - 人名</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="ns"> ns - 地名</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="nt"> nt - 机构团体</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="nz"> nz - 其他专名</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="nrt"> nrt - 音译名</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="nrfg"> nrfg - 音译人名</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="ng"> ng - 名词性语素</label>
+                        </div>
+                    </div>
+
+                    <!-- 动词类 -->
+                    <div class="pos-category">
+                        <div class="pos-category-title">动词类</div>
+                        <div class="pos-grid">
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="v"> v - 动词</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="vg"> vg - 动词性语素</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="vn"> vn - 名动词</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="vd"> vd - 副动词</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="vq"> vq - 动量词</label>
+                        </div>
+                    </div>
+
+                    <!-- 形容词类 -->
+                    <div class="pos-category">
+                        <div class="pos-category-title">形容词类</div>
+                        <div class="pos-grid">
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="a"> a - 形容词</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="ag"> ag - 形容词性语素</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="ad"> ad - 副形词</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="an"> an - 名形词</label>
+                        </div>
+                    </div>
+
+                    <!-- 副词类 -->
+                    <div class="pos-category">
+                        <div class="pos-category-title">副词类</div>
+                        <div class="pos-grid">
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="d"> d - 副词</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="dg"> dg - 副词性语素</label>
+                        </div>
+                    </div>
+
+                    <!-- 数量词类 -->
+                    <div class="pos-category">
+                        <div class="pos-category-title">数量词类</div>
+                        <div class="pos-grid">
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="m"> m - 数词</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="mg"> mg - 数词性语素</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="mq"> mq - 数量词</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="q"> q - 量词</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="qg"> qg - 量词性语素</label>
+                        </div>
+                    </div>
+
+                    <!-- 代词类 -->
+                    <div class="pos-category">
+                        <div class="pos-category-title">代词类</div>
+                        <div class="pos-grid">
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="r"> r - 代词</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="rg"> rg - 代词性语素</label>
+                        </div>
+                    </div>
+
+                    <!-- 虚词类 -->
+                    <div class="pos-category">
+                        <div class="pos-category-title">虚词类</div>
+                        <div class="pos-grid">
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="p"> p - 介词</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="c"> c - 连词</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="u"> u - 助词</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="ug"> ug - 助词性语素</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="uj"> uj - 助词性语素</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="f"> f - 方位词</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="b"> b - 区别词</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="bg"> bg - 区别语素</label>
+                        </div>
+                    </div>
+
+                    <!-- 时空类 -->
+                    <div class="pos-category">
+                        <div class="pos-category-title">时空类</div>
+                        <div class="pos-grid">
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="t"> t - 时间词</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="tg"> tg - 时间词性语素</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="s"> s - 处所词</label>
+                        </div>
+                    </div>
+
+                    <!-- 其他类 -->
+                    <div class="pos-category">
+                        <div class="pos-category-title">其他类</div>
+                        <div class="pos-grid">
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="x"> x - 标点符号</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="e"> e - 叹词</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="o"> o - 拟声词</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="y"> y - 语气词</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="i"> i - 成语</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="l"> l - 习用语</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="j"> j - 简称</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="jn"> jn - 简称名词</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="z"> z - 状态词</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="zg"> zg - 状态词性语素</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="k"> k - 后接成分</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="g"> g - 语素</label>
+                            <label class="pos-item"><input type="checkbox" class="rolling-pos-checkbox" value="eng"> eng - 英文/外语</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn" style="background: #6c757d;" onclick="closeRollingPosModal()">取消</button>
+                <button class="btn btn-success" onclick="confirmRollingPosConfig()">确定</button>
+            </div>
+        </div>
     </div>
 
     <script>
+        // ===== Tab切换功能 =====
+        function switchTab(tabName) {
+            // 隐藏所有tab内容
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 移除所有按钮的active状态
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // 显示选中的tab
+            if (tabName === 'direct') {
+                document.getElementById('directTab').classList.add('active');
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            } 
+            else if (tabName === 'rolling') 
+            {
+                document.getElementById('rollingTab').classList.add('active');
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            }
+        }
+
+        // ===== 直接分析功能 =====
         const fileInput = document.getElementById('fileInput');
         const resultDiv = document.getElementById('result');
         const uploadArea = document.querySelector('.upload-area');
@@ -580,6 +662,454 @@
                 analyzeBtn.disabled = false;
                 analyzeBtn.textContent = '开始分析';
             }
+        }
+
+        // ===== 滚动分析功能 =====
+        let rollingChart = null;
+        let rollingFileContent = null;
+        let currentReader = null;
+
+        // 打开词性过滤模态框
+        function openRollingPosModal() {
+            document.getElementById('rollingPosModal').classList.add('active');
+            updateRollingPosDisplay();
+        }
+
+        // 关闭词性过滤模态框
+        function closeRollingPosModal(event) {
+            // 如果event存在且点击的不是overlay，则不关闭
+            if (event && event.target.className !== 'modal-overlay active') {
+                return;
+            }
+            document.getElementById('rollingPosModal').classList.remove('active');
+        }
+
+        // 确认词性配置
+        function confirmRollingPosConfig() {
+            const posConfig = getRollingSelectedPos();
+            const configText = document.getElementById('rollingPosConfigText');
+            const configStatus = document.getElementById('rollingPosConfigStatus');
+            
+            if (posConfig.mode === 'none') {
+                configText.textContent = '不过滤';
+                configStatus.textContent = '未配置';
+            } else if (posConfig.mode === 'filter') {
+                configText.textContent = '过滤模式';
+                configStatus.textContent = posConfig.pos.length > 0 ? `已选 ${posConfig.pos.length} 项` : '未选择';
+            } else if (posConfig.mode === 'allow') {
+                configText.textContent = '放行模式';
+                configStatus.textContent = posConfig.pos.length > 0 ? `已选 ${posConfig.pos.length} 项` : '未选择';
+            }
+            
+            closeRollingPosModal();
+        }
+
+        // 全选滚动分析词性
+        function selectAllRollingPos() {
+            document.querySelectorAll('.rolling-pos-checkbox').forEach(cb => cb.checked = true);
+        }
+
+        // 清空滚动分析词性
+        function deselectAllRollingPos() {
+            document.querySelectorAll('.rolling-pos-checkbox').forEach(cb => cb.checked = false);
+        }
+
+        // 获取滚动分析选中的词性
+        function getRollingSelectedPos() {
+            const mode = document.querySelector('input[name="rollingFilterMode"]:checked').value;
+            if (mode === 'none') return { mode: 'none', pos: [] };
+
+            const selected = Array.from(document.querySelectorAll('.rolling-pos-checkbox:checked'))
+                .map(cb => cb.value);
+            return { mode, pos: selected };
+        }
+
+        // 根据模式显示/隐藏滚动分析词性选择表
+        function updateRollingPosDisplay() {
+            const mode = document.querySelector('input[name="rollingFilterMode"]:checked').value;
+            const quickSelect = document.querySelector('#rollingPosModal .quick-select');
+            const posCategories = document.querySelectorAll('#rollingPosCategories .pos-category');
+            
+            if (mode === 'none') {
+                if (quickSelect) quickSelect.style.display = 'none';
+                posCategories.forEach(cat => cat.style.display = 'none');
+            } else {
+                if (quickSelect) quickSelect.style.display = 'flex';
+                posCategories.forEach(cat => cat.style.display = 'block');
+            }
+        }
+
+
+
+        // 监听滚动分析模式选择变化
+        document.querySelectorAll('input[name="rollingFilterMode"]').forEach(radio => {
+            radio.addEventListener('change', updateRollingPosDisplay);
+        });
+
+        // 页面加载时初始化滚动分析显示状态
+        updateRollingPosDisplay();
+
+        // 滚动分析文件上传
+        document.getElementById('rollingFileInput').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                document.getElementById('rollingFileName').textContent = file.name;
+                document.getElementById('rollingFileStatus').style.display = 'block';
+                
+                // 读取文件内容
+                file.text().then(content => {
+                    rollingFileContent = content;
+                });
+            }
+        });
+
+        // ===== 图表管理 =====
+
+        // 初始化词云图
+        function initWordCloud() {
+            const canvas = document.getElementById('wordCloudCanvas');
+            if (!canvas) {
+                console.error('找不到词云canvas元素！');
+                return;
+            }
+            
+            // 清空画布
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // 更新词云图
+        function updateWordCloud(wordsData) {
+            const canvas = document.getElementById('wordCloudCanvas');
+            if (!canvas) {
+                console.error('找不到词云canvas元素！');
+                return;
+            }
+            
+            // 转换数据格式为 [[word, freq], ...]
+            const wordList = Object.entries(wordsData).map(([word, freq]) => [word, freq]);
+            
+            if (wordList.length === 0) {
+                // 如果没有数据，清空画布
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
+            
+            // 清空之前的词云
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 配置词云参数
+            WordCloud(canvas, {
+                list: wordList,
+                gridSize: Math.round(16 * canvas.width / 1024),
+                weightFactor: function(size) {
+                    return Math.pow(size, 0.7) * canvas.width / 80;
+                },
+                fontFamily: 'Microsoft YaHei, Arial, sans-serif',
+                color: function() {
+                    // 随机颜色
+                    const colors = [
+                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+                        '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF',
+                        '#4BC0C0', '#FF9F40', '#36A2EB'
+                    ];
+                    return colors[Math.floor(Math.random() * colors.length)];
+                },
+                rotateRatio: 0.3,
+                rotationSteps: 2,
+                backgroundColor: '#ffffff',
+                drawOutOfBound: false,
+                shrinkToFit: true
+            });
+        }
+
+        // 初始化图表
+        function initRollingChart() {
+            const canvas = document.getElementById('wordFreqChart');
+            
+            if (!canvas) {
+                console.error('找不到图表canvas元素！');
+                return;
+            }
+            
+            const ctx = canvas.getContext('2d');
+            
+            // 如果图表已存在，先销毁
+            if (rollingChart) {
+                rollingChart.destroy();
+            }
+            
+            // 创建新图表
+            rollingChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '词频',
+                        data: [],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(153, 102, 255, 0.7)',
+                            'rgba(255, 159, 64, 0.7)',
+                            'rgba(99, 255, 132, 0.7)',
+                            'rgba(235, 54, 162, 0.7)',
+                            'rgba(86, 255, 206, 0.7)',
+                            'rgba(192, 75, 192, 0.7)'
+                        ],
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 500
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0,
+                                font: { size: 14 }
+                            },
+                            title: {
+                                display: true,
+                                text: '出现次数',
+                                font: { size: 16, weight: 'bold' }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: { size: 14 }
+                            },
+                            title: {
+                                display: true,
+                                text: '热词',
+                                font: { size: 16, weight: 'bold' }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: { font: { size: 14 } }
+                        },
+                        title: {
+                            display: true,
+                            text: 'TopK 热词实时排行榜',
+                            font: { size: 18, weight: 'bold' }
+                        }
+                    }
+                }
+            });
+            
+        }
+
+        // 更新图表数据
+        function updateRollingChart(wordsData) {
+            if (!rollingChart) {
+                console.error('图表未初始化！');
+                return;
+            }
+            
+            // wordsData是一个对象 {word: freq, ...}，需要转换为数组
+            const words = Object.entries(wordsData).map(([word, freq]) => ({
+                word: word,
+                freq: freq
+            }));
+            
+            // 按频次降序排序
+            words.sort((a, b) => b.freq - a.freq);
+            
+            // 提取词语和频次
+            const labels = words.map(item => item.word);
+            const data = words.map(item => item.freq);
+            
+            // 更新图表
+            rollingChart.data.labels = labels;
+            rollingChart.data.datasets[0].data = data;
+            rollingChart.update();
+            
+            // 同步更新词云图
+            updateWordCloud(wordsData);
+        }
+
+        // ===== 时间管理 =====
+
+        // 格式化时间戳（秒 -> HH:MM:SS）
+        function formatTime(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            
+            return String(h).padStart(2, '0') + ':' +
+                   String(m).padStart(2, '0') + ':' +
+                   String(s).padStart(2, '0');
+        }
+
+        // 更新时间显示
+        function updateTimeDisplay(seconds) {
+            const timeStr = formatTime(seconds);
+            const timeElement = document.getElementById('currentTime');
+            
+            if (timeElement) {
+                timeElement.textContent = timeStr;
+            }
+        }
+
+        // 更新窗口信息显示
+        function updateWindowInfo(windowSize) {
+            const windowElement = document.getElementById('displayWindowSize');
+            
+            if (windowElement) {
+                windowElement.textContent = windowSize;
+            }
+        }
+
+        // ===== SSE流式分析 =====
+
+        // 开始滚动分析
+        function startRollingAnalysis() {
+            
+            if (!rollingFileContent) {
+                alert('请先上传文件！');
+                return;
+            }
+            
+            // 获取配置
+            const window = document.getElementById('windowSize').value;
+            const topk = document.getElementById('topKInput').value;
+            const step = document.getElementById('playSpeed').value;  // 时间步长（秒）
+            const posConfig = getRollingSelectedPos();
+            
+            
+            // 更新窗口信息
+            updateWindowInfo(window);
+            
+            // 初始化图表和词云图
+            initRollingChart();
+            initWordCloud();
+            
+            // 禁用开始按钮，启用停止按钮
+            const startBtn = document.getElementById('startRolling');
+            const stopBtn = document.getElementById('stopRolling');
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            
+            
+            // 构造JSON请求体
+            const requestData = {
+                content: rollingFileContent,
+                window: parseInt(window),
+                topk: parseInt(topk),
+                speed: parseInt(step),  
+                mode: posConfig.mode,
+                pos: posConfig.pos
+            };
+            
+            
+            // 发送POST请求
+            fetch('/api/stream-analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('服务器响应错误: ' + response.status);
+                }
+                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                
+                function readStream() {
+                    reader.read().then(({done, value}) => {
+                        if (done) {
+                            startBtn.disabled = false;
+                            stopBtn.disabled = true;
+                            return;
+                        }
+                        
+                        // 解码数据并添加到缓冲区
+                        buffer += decoder.decode(value, { stream: true });
+                         
+                        // 按行分割（SSE消息以\n\n结束）
+                        const lines = buffer.split('\n');
+                        
+                        // 保留最后一个不完整的行
+                        buffer = lines.pop() || '';
+                        
+                        // 处理每一行
+                        for (let line of lines) {
+                            line = line.trim();
+                            if (line.startsWith('data: ')) {
+                                const jsonStr = line.substring(6);
+                                try {
+                                    const data = JSON.parse(jsonStr);
+                                    
+                                    if (data.done) {
+                                        startBtn.disabled = false;
+                                        stopBtn.disabled = true;
+                                        reader.cancel();
+                                        return;
+                                    }
+                                    
+                                    // 更新时间显示
+                                    if (data.timestamp !== undefined) {
+                                        updateTimeDisplay(data.timestamp);
+                                    }
+                                    
+                                    // 更新图表
+                                    if (data.words) {
+                                        updateRollingChart(data.words);
+                                    }
+                                    
+                                } catch(e) {
+                                    console.error('JSON解析失败:', jsonStr, e);
+                                }
+                            }
+                        }
+                        
+                        // 继续读取
+                        readStream();
+                    }).catch(error => {
+                        console.error('读取流失败:', error);
+                        alert('连接中断: ' + error.message);
+                        startBtn.disabled = false;
+                        stopBtn.disabled = true;
+                    });
+                }
+                
+                // 保存reader用于停止
+                currentReader = reader;
+                readStream();
+            })
+            .catch(error => {
+                console.error('请求失败:', error);
+                alert('连接失败: ' + error.message);
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+            });
+        }
+
+        // 停止滚动分析
+        function stopRollingAnalysis() {
+            if (currentReader) {
+                currentReader.cancel();
+                currentReader = null;
+            }
+            
+            const startBtn = document.getElementById('startRolling');
+            const stopBtn = document.getElementById('stopRolling');
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
         }
     </script>
 </body>

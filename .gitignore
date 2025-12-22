@@ -6,3 +6,4 @@ build/
 bin/
 output.txt
 data/temp*
+docs*

@@ -1,15 +1,20 @@
 #include "../include/ha_engine.h"
 #include "../include/stop_words_manager.h"
 // 初始化 jieba 和 SWmanager
-HaEngine::HaEngine(const std::string &dictPath, const std::string &hmmPath, const std::string &userDictPath,
-                   const std::string &idfPath, const std::string &stopWordDictPath, int window, int k, std::unordered_set<std::string> &ftr,
-                   std::unordered_set<std::string> &csr, const std::string &i, const std::string &o) : jieba(dictPath, hmmPath, userDictPath, idfPath, stopWordDictPath),
-                                                                                                       SWManager(stopWordDictPath),
-                                                                                                       TWManager(window),
-                                                                                                       topK(k), filter(ftr), chooser(csr), inputFile(i), outputFile(o) { out.open(outputFile, std::ios::binary); }
+HaEngine::HaEngine
+(
+    const std::string &dictPath, const std::string &hmmPath, const std::string &userDictPath,
+    const std::string &idfPath, const std::string &stopWordDictPath, int window, int k, std::unordered_set<std::string> &ftr,
+    std::unordered_set<std::string> &csr, const std::string &i, const std::string &o
+) : 
+    jieba(dictPath, hmmPath, userDictPath, idfPath, stopWordDictPath),
+    SWManager(stopWordDictPath),
+    TWManager(window),
+    topK(k), filter(ftr), chooser(csr), inputFile(i), outputFile(o) 
+    { out.open(outputFile, std::ios::binary); }
 
 // 将新到的句子分词，然后更新时间窗口、词频和词排行榜
-void HaEngine::cutWord()
+bool HaEngine::cutWord()
 {
     if (!readUtf8Lines(lines))
     {
@@ -54,10 +59,11 @@ void HaEngine::cutWord()
             countTopKWords(out);
         }
     }
+    return true;
 }
 
 // 分词的同时过滤掉不需要的词性
-void HaEngine::cutWordFilter()
+bool HaEngine::cutWordFilter()
 {
     if (!readUtf8Lines(lines))
     {
@@ -98,10 +104,11 @@ void HaEngine::cutWordFilter()
             countTopKWords(out);
         }
     }
+    return true;
 }
 
 // 选择用户所需的词
-void HaEngine::cutWordChooser()
+bool HaEngine::cutWordChooser()
 {
     if (!readUtf8Lines(lines))
     {
@@ -142,6 +149,7 @@ void HaEngine::cutWordChooser()
             countTopKWords(out);
         }
     }
+    return true;
 }
 
 // 删去已经离开时间窗口的词
@@ -158,7 +166,6 @@ void HaEngine::removeOutdatedWords()
 // 计算当前时间窗口的 TopK 词汇
 void HaEngine::countTopKWords(std::ofstream &out)
 {
-
     out << std::setfill('0') << '[' << std::setw(2) << TWManager.getCurrentTime() / 3600 << ':' << std::setw(2) << (TWManager.getCurrentTime() % 3600) / 60 << ':' << std::setw(2) << TWManager.getCurrentTime() % 60 << "]\n";
     auto it = ranker.getRankingSet().rbegin();
     for (int i{1}; i <= topK && it != ranker.getRankingSet().rend(); ++i, ++it)

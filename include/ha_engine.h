@@ -14,7 +14,7 @@
 using Tword = std::pair<int, std::string>;
 class HaEngine
 {
-    private:
+    protected:
         TimeWindowManager TWManager;                           // 时间窗口管理器
         WordRanker ranker;                                     // 词频排名管理器
         StopWordsManager SWManager;
@@ -29,20 +29,20 @@ class HaEngine
         std::unordered_set<std::string> filter;        
         std::unordered_set<std::string> chooser;                   
         
-        public:
+    public:
         cppjieba::Jieba jieba;
         
         HaEngine(const std::string& dictPath, const std::string& hmmPath, const std::string& userDictPath, 
                  const std::string& idfPath, const std::string& stopWordDictPath, int window, int k, std::unordered_set<std::string>& ftr,
                  std::unordered_set<std::string>& chsr, const std::string &i, const std::string &o);
         // void cutWordsTest();
-        void cutWord();
-        void cutWordFilter();
-        void cutWordChooser();
+        virtual bool cutWord();
+        virtual bool cutWordFilter();
+        virtual bool cutWordChooser();
         bool readUtf8Lines(std::vector<std::string>& lines);
-        void testOutput();
+        // void testOutput();
         void removeOutdatedWords();
-        void countTopKWords(std::ofstream& out);
+        virtual void countTopKWords(std::ofstream& out);
 
 };
 
