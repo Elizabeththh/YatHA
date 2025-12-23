@@ -4,22 +4,22 @@
 $ErrorActionPreference = "Stop"
 
 Write-Host "=========================================" -ForegroundColor Cyan
-Write-Host "  YATHA 热词统计系统 - 自动运行脚本" -ForegroundColor Cyan
+Write-Host "  YATHA Auto Build & Run Script" -ForegroundColor Cyan
 Write-Host "=========================================" -ForegroundColor Cyan
 Write-Host ""
 
 # 检测操作系统
 function Detect-Platform {
-    Write-Host "[1/4] 检测操作系统平台..." -ForegroundColor Blue
+    Write-Host "[1/4] Detecting platform..." -ForegroundColor Blue
     
     $platform = [System.Environment]::OSVersion.Platform
     if ($platform -eq "Win32NT") {
-        Write-Host "检测到平台: Windows $([System.Environment]::OSVersion.Version)" -ForegroundColor Green
+        Write-Host "Platform detected: Windows $([System.Environment]::OSVersion.Version)" -ForegroundColor Green
         Write-Host ""
         return "Windows"
     } else {
-        Write-Host "未知平台: $platform" -ForegroundColor Red
-        Write-Host "  请使用 Linux/macOS 的 run.sh 脚本" -ForegroundColor Yellow
+        Write-Host "Unknown platform: $platform" -ForegroundColor Red
+        Write-Host "  Please use run.sh for Linux/macOS" -ForegroundColor Yellow
         exit 1
     }
 }
@@ -40,14 +40,13 @@ function Check-Xmake {
 
 # 安装 xmake
 function Install-Xmake {
-    Write-Host "[2/4] 安装 xmake 构建工具..." -ForegroundColor Blue
+    Write-Host "[2/4] Installing xmake build tool..." -ForegroundColor Blue
     Write-Host ""
     
     $installSuccess = $false
     
-    # 方式1: 官方 PowerShell 安装脚本 (首选)
-    Write-Host "方式1: 使用官方 PowerShell 脚本..." -ForegroundColor Cyan
-    Write-Host "执行: irm https://xmake.io/psget.text | iex" -ForegroundColor Gray
+    Write-Host "Method 1: Official PowerShell script..." -ForegroundColor Cyan
+    Write-Host "Executing: irm https://xmake.io/psget.text | iex" -ForegroundColor Gray
     try {
         Invoke-Expression (Invoke-RestMethod 'https://xmake.io/psget.text')
         
@@ -57,34 +56,33 @@ function Install-Xmake {
         if (Check-Xmake) {
             $installSuccess = $true
             Write-Host "" 
-            Write-Host "xmake 安装成功: $script:XmakeVersion" -ForegroundColor Green
+            Write-Host "xmake installed successfully: $script:XmakeVersion" -ForegroundColor Green
         }
     } catch {
-        Write-Host "官方脚本安装失败: $_" -ForegroundColor Yellow
+        Write-Host "Official script installation failed: $_" -ForegroundColor Yellow
     }
     
     # 如果官方脚本失败，尝试备选方式
     if (-not $installSuccess) {
         Write-Host ""
-        Write-Host "尝试备选安装方式..." -ForegroundColor Yellow
+        Write-Host "Trying alternative methods..." -ForegroundColor Yellow
         Write-Host ""
         
-        # 方式2: Scoop (备选)
         try {
             $scoopVersion = & scoop --version 2>$null
             if ($scoopVersion) {
-                Write-Host "方式2: 使用 Scoop 安装..." -ForegroundColor Cyan
-                Write-Host "执行: scoop install xmake" -ForegroundColor Gray
+                Write-Host "Method 2: Using Scoop..." -ForegroundColor Cyan
+                Write-Host "Executing: scoop install xmake" -ForegroundColor Gray
                 & scoop install xmake
                 
                 if (Check-Xmake) {
                     $installSuccess = $true
                     Write-Host ""
-                    Write-Host "xmake 安装成功: $script:XmakeVersion" -ForegroundColor Green
+                    Write-Host "xmake installed successfully: $script:XmakeVersion" -ForegroundColor Green
                 }
             }
         } catch {
-            Write-Host "Scoop 安装失败" -ForegroundColor Yellow
+            Write-Host "Scoop installation failed" -ForegroundColor Yellow
         }
         
         # 方式3: Winget (备选)
@@ -92,8 +90,8 @@ function Install-Xmake {
             try {
                 $wingetVersion = & winget --version 2>$null
                 if ($wingetVersion) {
-                    Write-Host "方式3: 使用 Winget 安装..." -ForegroundColor Cyan
-                    Write-Host "执行: winget install xmake" -ForegroundColor Gray
+                    Write-Host "Method 3: Using Winget..." -ForegroundColor Cyan
+                    Write-Host "Executing: winget install xmake" -ForegroundColor Gray
                     & winget install xmake --silent
                     
                     # 刷新环境变量
@@ -102,11 +100,11 @@ function Install-Xmake {
                     if (Check-Xmake) {
                         $installSuccess = $true
                         Write-Host ""
-                        Write-Host "xmake 安装成功: $script:XmakeVersion" -ForegroundColor Green
+                        Write-Host "xmake installed successfully: $script:XmakeVersion" -ForegroundColor Green
                     }
                 }
             } catch {
-                Write-Host "Winget 安装失败" -ForegroundColor Yellow
+                Write-Host "Winget installation failed" -ForegroundColor Yellow
             }
         }
     }
@@ -114,14 +112,14 @@ function Install-Xmake {
     # 验证最终安装结果
     if (-not $installSuccess) {
         Write-Host ""
-        Write-Host "xmake 自动安装失败" -ForegroundColor Red
+        Write-Host "xmake auto installation failed" -ForegroundColor Red
         Write-Host ""
-        Write-Host "请尝试手动安装:" -ForegroundColor Yellow
-        Write-Host "  官方脚本: irm https://xmake.io/psget.text | iex" -ForegroundColor Gray
-        Write-Host "  GitHub 下载: https://github.com/xmake-io/xmake/releases" -ForegroundColor Gray
+        Write-Host "Please install manually:" -ForegroundColor Yellow
+        Write-Host "  Official: irm https://xmake.io/psget.text | iex" -ForegroundColor Gray
+        Write-Host "  GitHub: https://github.com/xmake-io/xmake/releases" -ForegroundColor Gray
         Write-Host "  Scoop: scoop install xmake" -ForegroundColor Gray
         Write-Host "  Winget: winget install xmake" -ForegroundColor Gray
-        Write-Host "  安装指南: https://xmake.io/#/guide/installation" -ForegroundColor Gray
+        Write-Host "  Guide: https://xmake.io/#/guide/installation" -ForegroundColor Gray
         exit 1
     }
     Write-Host ""
@@ -129,61 +127,57 @@ function Install-Xmake {
 
 # 构建项目
 function Build-Project {
-    Write-Host "[3/4] 构建项目..." -ForegroundColor Blue
+    Write-Host "[3/4] Building project..." -ForegroundColor Blue
     Write-Host ""
     
-    # 配置项目
-    Write-Host "配置项目..." -ForegroundColor Cyan
+    Write-Host "Configuring..." -ForegroundColor Cyan
     & xmake config -y
     
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "项目配置失败" -ForegroundColor Red
+        Write-Host "Configuration failed" -ForegroundColor Red
         exit 1
     }
     
-    # 编译项目
     Write-Host ""
-    Write-Host "编译中..." -ForegroundColor Cyan
+    Write-Host "Compiling..." -ForegroundColor Cyan
     & xmake build -y
     
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "项目构建失败" -ForegroundColor Red
+        Write-Host "Build failed" -ForegroundColor Red
         exit 1
     }
     
     Write-Host ""
-    Write-Host "项目构建成功" -ForegroundColor Green
+    Write-Host "Build successful" -ForegroundColor Green
     Write-Host ""
     
-    # 检查并创建必要的目录
-    Write-Host "检查运行环境..." -ForegroundColor Cyan
+    Write-Host "Checking environment..." -ForegroundColor Cyan
     $requiredDirs = @("data\temp", "data\temp\sse", "data\dict")
     foreach ($dir in $requiredDirs) {
         if (-not (Test-Path $dir)) {
-            Write-Host "创建目录: $dir" -ForegroundColor Yellow
+            Write-Host "Creating directory: $dir" -ForegroundColor Yellow
             New-Item -ItemType Directory -Path $dir -Force | Out-Null
         } else {
-            Write-Host "目录已存在: $dir" -ForegroundColor Green
+            Write-Host "Directory exists: $dir" -ForegroundColor Green
         }
     }
     
-    # 检查必要的文件
     Write-Host ""
-    Write-Host "检查必要文件..." -ForegroundColor Cyan
+    Write-Host "Checking required files..." -ForegroundColor Cyan
     $requiredPaths = @("web\index.html", "data\dict\jieba.dict.utf8")
     $missingFiles = @()
     foreach ($path in $requiredPaths) {
         if (-not (Test-Path $path)) {
-            Write-Host "缺失文件: $path" -ForegroundColor Red
+            Write-Host "Missing file: $path" -ForegroundColor Red
             $missingFiles += $path
         } else {
-            Write-Host "文件存在: $path" -ForegroundColor Green
+            Write-Host "File exists: $path" -ForegroundColor Green
         }
     }
     
     if ($missingFiles.Count -gt 0) {
         Write-Host ""
-        Write-Host "警告: 发现缺失文件，程序可能无法正常运行" -ForegroundColor Yellow
+        Write-Host "Warning: Missing files detected, program may not work properly" -ForegroundColor Yellow
     }
     
     Write-Host ""
@@ -191,7 +185,7 @@ function Build-Project {
 
 # 运行项目
 function Run-Project {
-    Write-Host "[4/4] 运行 YATHA..." -ForegroundColor Blue
+    Write-Host "[4/4] Running YATHA..." -ForegroundColor Blue
     Write-Host "=========================================" -ForegroundColor Cyan
     Write-Host ""
     
@@ -204,20 +198,19 @@ function Main {
         # 检测平台
         $platform = Detect-Platform
         
-        # 检查并安装 xmake
-        Write-Host "[2/4] 检查 xmake 构建工具..." -ForegroundColor Blue
+        Write-Host "[2/4] Checking xmake build tool..." -ForegroundColor Blue
         if (Check-Xmake) {
-            Write-Host "xmake 已安装: $script:XmakeVersion" -ForegroundColor Green
+            Write-Host "xmake is installed: $script:XmakeVersion" -ForegroundColor Green
             Write-Host ""
         } else {
-            Write-Host "xmake 未安装" -ForegroundColor Yellow
+            Write-Host "xmake is not installed" -ForegroundColor Yellow
             Write-Host ""
             
-            $response = Read-Host "是否现在安装 xmake? (Y/N)"
+            $response = Read-Host "Install xmake now? (Y/N)"
             if ($response -match "^[Yy]$") {
                 Install-Xmake
             } else {
-                Write-Host "取消安装，退出脚本" -ForegroundColor Yellow
+                Write-Host "Installation cancelled, exiting" -ForegroundColor Yellow
                 exit 0
             }
         }
@@ -230,7 +223,7 @@ function Main {
         
     } catch {
         Write-Host ""
-        Write-Host "发生错误: $_" -ForegroundColor Red
+        Write-Host "Error occurred: $_" -ForegroundColor Red
         Write-Host $_.ScriptStackTrace -ForegroundColor Red
         exit 1
     }
