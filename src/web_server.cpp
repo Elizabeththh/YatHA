@@ -369,7 +369,7 @@ void WebServer::setupRoutes()
 void WebServer::start(const std::string &host, int port)
 {
     int actualPort = port;
-    int maxRetries = 10;
+    int maxRetries = 50; // 尝试 50 个端口 (8080-8129)
     bool started = false;
 
     for (int i = 0; i < maxRetries; i++)
