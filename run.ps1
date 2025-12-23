@@ -3,6 +3,12 @@
 
 $ErrorActionPreference = "Stop"
 
+# 设置控制台编码为 UTF-8，避免中文乱码和文件读取问题
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+[Console]::InputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
+chcp 65001 | Out-Null
+
 Write-Host "=========================================" -ForegroundColor Cyan
 Write-Host "  YATHA Auto Build & Run Script" -ForegroundColor Cyan
 Write-Host "=========================================" -ForegroundColor Cyan
