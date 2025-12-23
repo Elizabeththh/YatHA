@@ -1,4 +1,4 @@
-// ===== Tab切换功能 =====
+// Tab切换功能
 function switchTab(tabName) {
     document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
     const index = tabName === 'direct' ? 0 : 1;
@@ -6,7 +6,7 @@ function switchTab(tabName) {
     document.querySelectorAll('.tab-btn')[index].classList.add('active');
 }
 
-// ===== 直接分析功能 =====
+// 直接分析功能
 const fileInput = document.getElementById('fileInput');
 const resultDiv = document.getElementById('result');
 const uploadArea = document.querySelector('.upload-area');
@@ -16,7 +16,7 @@ const analyzeBtn = document.getElementById('analyzeBtn');
 
 let selectedFile = null;
 
-// ===== 词性过滤功能 =====
+// 词性过滤功能 
 function togglePosFilter() {
     const content = document.getElementById('posFilterContent');
     const icon = document.getElementById('collapseIcon');
@@ -103,7 +103,7 @@ async function analyzeFile(file) {
     }
 }
 
-// ===== 滚动分析功能 =====
+// 滚动分析功能
 let rollingChart = null;
 let rollingFileContent = null;
 let currentReader = null;
@@ -163,7 +163,7 @@ document.getElementById('rollingFileInput').addEventListener('change', e => {
     }
 });
 
-// ===== 图表管理 =====
+// 图表管理
 
 function initWordCloud() {
     const canvas = document.getElementById('wordCloudCanvas');
@@ -285,7 +285,7 @@ function updateRollingChart(wordsData) {
     updateWordCloud(wordsData);
 }
 
-// ===== 时间管理 =====
+// 时间管理
 
 function formatTime(seconds) {
     const h = Math.floor(seconds / 3600);
@@ -304,7 +304,7 @@ function updateWindowInfo(windowSize) {
     if (elem) elem.textContent = windowSize;
 }
 
-// ===== SSE流式分析 =====
+// SSE流式分析
 
 function startRollingAnalysis() {
     if (!rollingFileContent) {
