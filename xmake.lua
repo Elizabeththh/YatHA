@@ -1,7 +1,7 @@
 add_rules("mode.debug", "mode.release")
 
 -- 添加 Catch2 依赖
-add_requires("catch2 3.x")
+-- add_requires("catch2 3.x")   
 
 target("yatha")
     set_kind("binary")
