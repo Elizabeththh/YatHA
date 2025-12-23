@@ -368,6 +368,42 @@ void WebServer::setupRoutes()
 // 启动服务器
 void WebServer::start(const std::string &host, int port)
 {
-    std::cout << "服务已在 http://" << host << ":" << port << " 启动" << std::endl;
-    server.listen(host.c_str(), port);
+    int actualPort = port;
+    int maxRetries = 10;
+    bool started = false;
+
+    for (int i = 0; i < maxRetries; i++)
+    {
+        actualPort = port + i;
+        std::cout << "正在尝试启动服务器: http://" << host << ":" << actualPort << "..." << std::endl;
+        
+        server.set_read_timeout(5, 0);
+        server.set_write_timeout(5, 0);
+        
+        if (server.bind_to_port(host.c_str(), actualPort))
+        {
+            std::cout << "\n服务器启动成功！" << std::endl;
+            std::cout << "========================================" << std::endl;
+            std::cout << "  访问地址: http://" << host << ":" << actualPort << std::endl;
+            std::cout << "========================================" << std::endl;
+            started = true;
+            break;
+        }
+        else
+        {
+            std::cout << "端口 " << actualPort << " 已被占用，尝试下一个端口..." << std::endl;
+        }
+    }
+
+    if (!started)
+    {
+        std::cerr << "\n错误: 尝试端口 " << port << "-" << (port + maxRetries - 1) << " 后仍无法找到可用端口" << std::endl;
+        std::cerr << "请检查是否有其他服务占用了这些端口。" << std::endl;
+        return;
+    }
+
+    if (!server.listen_after_bind())
+    {
+        std::cerr << "错误: 服务器启动失败" << std::endl;
+    }
 }

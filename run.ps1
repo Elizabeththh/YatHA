@@ -1,5 +1,5 @@
-# YATHA 自动运行脚本 (Windows PowerShell)
-# 自动检测平台、安装 xmake、构建并运行项目
+# YATHA Auto Build & Run Script (Windows PowerShell)
+# Auto-detect platform, install xmake, build and run project
 
 $ErrorActionPreference = "Stop"
 
@@ -8,7 +8,6 @@ Write-Host "  YATHA Auto Build & Run Script" -ForegroundColor Cyan
 Write-Host "=========================================" -ForegroundColor Cyan
 Write-Host ""
 
-# 检测操作系统
 function Detect-Platform {
     Write-Host "[1/4] Detecting platform..." -ForegroundColor Blue
     
@@ -24,7 +23,6 @@ function Detect-Platform {
     }
 }
 
-# 检查 xmake 是否已安装
 function Check-Xmake {
     try {
         $version = & xmake --version 2>$null | Select-Object -First 1
@@ -38,7 +36,6 @@ function Check-Xmake {
     return $false
 }
 
-# 安装 xmake
 function Install-Xmake {
     Write-Host "[2/4] Installing xmake build tool..." -ForegroundColor Blue
     Write-Host ""
@@ -50,7 +47,6 @@ function Install-Xmake {
     try {
         Invoke-Expression (Invoke-RestMethod 'https://xmake.io/psget.text')
         
-        # 刷新环境变量
         $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
         
         if (Check-Xmake) {
@@ -62,7 +58,6 @@ function Install-Xmake {
         Write-Host "Official script installation failed: $_" -ForegroundColor Yellow
     }
     
-    # 如果官方脚本失败，尝试备选方式
     if (-not $installSuccess) {
         Write-Host ""
         Write-Host "Trying alternative methods..." -ForegroundColor Yellow
@@ -85,7 +80,6 @@ function Install-Xmake {
             Write-Host "Scoop installation failed" -ForegroundColor Yellow
         }
         
-        # 方式3: Winget (备选)
         if (-not $installSuccess) {
             try {
                 $wingetVersion = & winget --version 2>$null
@@ -94,7 +88,6 @@ function Install-Xmake {
                     Write-Host "Executing: winget install xmake" -ForegroundColor Gray
                     & winget install xmake --silent
                     
-                    # 刷新环境变量
                     $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
                     
                     if (Check-Xmake) {
@@ -109,7 +102,6 @@ function Install-Xmake {
         }
     }
     
-    # 验证最终安装结果
     if (-not $installSuccess) {
         Write-Host ""
         Write-Host "xmake auto installation failed" -ForegroundColor Red
@@ -125,7 +117,6 @@ function Install-Xmake {
     Write-Host ""
 }
 
-# 构建项目
 function Build-Project {
     Write-Host "[3/4] Building project..." -ForegroundColor Blue
     Write-Host ""
@@ -183,7 +174,6 @@ function Build-Project {
     Write-Host ""
 }
 
-# 运行项目
 function Run-Project {
     Write-Host "[4/4] Running YATHA..." -ForegroundColor Blue
     Write-Host "=========================================" -ForegroundColor Cyan
@@ -192,10 +182,8 @@ function Run-Project {
     & xmake run yatha
 }
 
-# 主流程
 function Main {
     try {
-        # 检测平台
         $platform = Detect-Platform
         
         Write-Host "[2/4] Checking xmake build tool..." -ForegroundColor Blue
@@ -215,10 +203,7 @@ function Main {
             }
         }
         
-        # 构建项目
         Build-Project
-        
-        # 运行项目
         Run-Project
         
     } catch {
@@ -229,5 +214,4 @@ function Main {
     }
 }
 
-# 执行主流程
 Main
