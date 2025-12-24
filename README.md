@@ -84,3 +84,24 @@ bash ./run.sh
 
 打开 Git Bash 中提示的 URL 即可
 
+--- 
+## 运行单元测试
+
+现有的单元测试有：
+- test_word_ranker (测试 `WordRanker` 类的成员函数，即检测 TopK 功能的正确性)
+- test_stop_words_manager (测试 `StopWordsManager` 类的成员函数，即过滤停用词功能的正确性)
+- test_time_window_manager (测试 `TimeWindowManager` 类的成员函数，即时间窗口功能的正确性)
+- test_ha_engine_sse (测试 `HaEngineSSE` 类的成员函数，即 Web GUI 的滚动分析功能的正确性)
+
+如果要运行单元测试，首先将`xmake.lua`的这一行取消注释
+```lua
+-- add_requires("catch2 3.x")   
+```
+然后运行：
+```shell
+xmake run <单元测试名>
+```
+单元测试名即上面列出的名字。下载链接 Catch2 库需要一段时间，请耐心等待
+
+如果想要添加新的测例，请在 tests 目录下找到对应的测试文件，仿照已有测试代码添加即可
+
