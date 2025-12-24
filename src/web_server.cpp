@@ -392,7 +392,7 @@ void WebServer::start(const std::string &host, int port)
         if (server.is_running()) {
             std::cout << "\n服务器启动成功！" << std::endl;
             std::cout << "========================================" << std::endl;
-            std::cout << "  访问地址: http://" << host << ":" << actualPort << std::endl;
+            std::cout << "  访问地址: http://localhost:" << actualPort << std::endl;
             std::cout << "========================================" << std::endl;
             started = true;
             listenThread.join();
