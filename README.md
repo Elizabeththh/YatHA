@@ -6,6 +6,42 @@
 
 本项目是数据结构与算法课程大作业的实现，仅供学习交流使用。
 
+## 目录结构
+```shell
+.
+├── LICENSE
+├── README.md
+├── data                          # 项目数据
+├── docs                          # 项目文档
+├── img                           # 文档图片
+├── include
+│   ├── constants.h
+│   ├── ha_engine.h
+│   ├── ha_engine_sse.h
+│   ├── stop_words_manager.h
+│   ├── time_window_manager.h
+│   ├── web_server.h
+│   └── word_ranker.h
+├── run.sh                        # bash 运行脚本
+├── src                           # 项目源文件
+│   ├── ha_engine.cpp
+│   ├── ha_engine_sse.cpp
+│   ├── stop_words_manager.cpp
+│   ├── time_window_manager.cpp
+│   ├── web_server.cpp
+│   ├── word_ranker.cpp
+│   └── yatha.cpp
+├── tests                         # 测试代码
+├── third_party                   # 第三方库
+├── web                           # 前端三件套
+│   ├── index.html
+│   ├── script.js
+│   └── styles.css
+└── xmake.lua                     # xmake 构建脚本
+
+14 directories, 99 files
+```
+
 ### 核心特性
 
 - **滑动时间窗口**：采用高效的时间窗口算法，实时追踪指定时间段内的词频变化
