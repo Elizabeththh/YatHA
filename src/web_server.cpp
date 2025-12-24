@@ -369,29 +369,42 @@ void WebServer::setupRoutes()
 void WebServer::start(const std::string &host, int port)
 {
     int actualPort = port;
-    int maxRetries = 50; // 尝试 50 个端口 (8080-8129)
+    int maxRetries = 10; // 尝试 10 个端口 (8080-8089)       
     bool started = false;
+
+    server.set_read_timeout(5, 0);
+    server.set_write_timeout(5, 0);
 
     for (int i = 0; i < maxRetries; i++)
     {
         actualPort = port + i;
         std::cout << "正在尝试启动服务器: http://" << host << ":" << actualPort << "..." << std::endl;
         
-        server.set_read_timeout(5, 0);
-        server.set_write_timeout(5, 0);
         
-        if (server.bind_to_port(host.c_str(), actualPort))
-        {
+        std::atomic<bool> bindSuccess(false);
+        std::thread listenThread([&]() {
+            bindSuccess = server.listen(host.c_str(), actualPort);
+        });
+
+        // 等待一小段时间看服务器是否成功启动
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        
+        if (server.is_running()) {
             std::cout << "\n服务器启动成功！" << std::endl;
             std::cout << "========================================" << std::endl;
             std::cout << "  访问地址: http://" << host << ":" << actualPort << std::endl;
             std::cout << "========================================" << std::endl;
             started = true;
-            break;
+            listenThread.join();
+            return;
         }
         else
         {
-            std::cout << "端口 " << actualPort << " 已被占用，尝试下一个端口..." << std::endl;
+            std::cout << "端口 " << actualPort << " 已被占用或无法绑定，尝试下一个端口..." << std::endl;
+            server.stop();
+            if (listenThread.joinable()) {
+                listenThread.join();
+            }
         }
     }
 
@@ -399,11 +412,5 @@ void WebServer::start(const std::string &host, int port)
     {
         std::cerr << "\n错误: 尝试端口 " << port << "-" << (port + maxRetries - 1) << " 后仍无法找到可用端口" << std::endl;
         std::cerr << "请检查是否有其他服务占用了这些端口。" << std::endl;
-        return;
-    }
-
-    if (!server.listen_after_bind())
-    {
-        std::cerr << "错误: 服务器启动失败" << std::endl;
     }
 }

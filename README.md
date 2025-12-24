@@ -11,18 +11,18 @@
 - **智能分词**：基于 cppjieba 分词库，支持中文分词、词性标注和自定义词典
 - **词性过滤**：提供灵活的词性过滤和放行机制，可按需筛选名词、动词、形容词等特定词性的热词
 - **TopK 排行**：高效的词频统计和排序算法，快速获取指定数量的高频词汇
-- **Web GUI**：现代化的 Web 界面，支持文本上传、实时分析、滚动查询和可视化展示
+- **Web GUI**：提供简洁流畅的 Web 界面，支持文本上传、直接分析、滚动饭呢西和可视化展示
 - **高性能**：采用模块化设计，时间窗口管理器、词频排名管理器各司其职，性能优异
 - **跨平台支持**：基于 Xmake 构建系统，支持 Linux、macOS、Windows 等多平台编译运行
 - **测试保障**：集成 Catch2 测试框架，确保代码质量和稳定性
 
 ### 技术架构
 
-- **分词引擎**：cppjieba（支持多种分词模式和词性标注）
-- **Web 服务**：cpp-httplib（轻量级 HTTP 服务器）
-- **数据处理**：nlohmann/json（JSON 数据解析）
-- **构建工具**：Xmake（现代化的跨平台构建工具）
-- **测试框架**：Catch2（单元测试与集成测试）
+- **分词引擎**：[cppjieba](https://github.com/yanyiwu/cppjieba)，支持多种分词模式和词性标注
+- **Web 服务**：使用 [cpp-httplib](https://github.com/yhirose/cpp-httplib)，一个轻量级的 HTTP 服务器
+- **数据处理**：JSON 数据的解析使用了 [nlohmann/json](https://github.com/nlohmann/json) 库
+- **构建工具**：选用 [Xmake](https://github.com/xmake-io/xmake) 作为跨平台构建工具
+- **测试框架**：[Catch2](https://github.com/catchorg/Catch2)
 
 ---
 ## 版本迭代记录
@@ -41,20 +41,43 @@
 ## 快速开始
 
 ### 克隆项目仓库
+
+#### Linux
 ```shell
+sudo apt update && sudo apt install git -y
 git clone https://github.com/Elizabeththh/YATHA.git
 cd YATHA
+./run.sh
 ```
-
-### 运行脚本
-#### Linux/MacOS
+如果提示没有执行权限，
 ```shell
-chmod +x run.sh
+sudo chmod +x run.sh
+./run.sh
 ```
-#### Windows
-```powershell
-.\run.ps1
-```
-服务会开放在 http://localhost:8080，打开浏览器即可访问
 
+
+
+#### MacOS
+```shell
+# 如果没有安装 Homebrew 包管理器，先安装：
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew install git
+git clone https://github.com/Elizabeththh/YATHA.git
+cd YATHA
+bash ./run.sh
+```
+
+#### Windows
+先在官网下载 Git 安装包：[官网下载地址](https://github.com/git-for-windows/git/releases/download/v2.52.0.windows.1/Git-2.52.0-64-bit.exe)
+
+下载仓库源码：
+![alt text](img/clone.png)
+在文件资源管理器中打开项目文件夹，右键空白区域
+![alt text](img/gitbash.png)
+在打开的 Git Bash 中输入
+```shell
+./run.sh
+```
+![alt text](img/bash.png)
+打开 Git Bash 中提示的 URL 即可
 
