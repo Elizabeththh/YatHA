@@ -214,8 +214,8 @@ bool HaEngine::readUtf8Lines(std::vector<std::string> &lines)
     std::string line;
     while (std::getline(ifs, line))
     {
-        if (!line.empty() && line.back() == '\r')
-            line.pop_back();
+        // 移除所有的 \r 字符（不只是行尾的）
+        line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
         if (!line.empty())
             lines.push_back(line);
     }

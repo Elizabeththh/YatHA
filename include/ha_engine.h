@@ -8,6 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <algorithm>
 
 using Tword = std::pair<int, std::string>;
 class HaEngine
