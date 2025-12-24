@@ -4,5 +4,3 @@ test_sentences.txt
 build/
 .xmake
 output.txt
-data/temp*
-data/tests/*
