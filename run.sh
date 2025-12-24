@@ -32,13 +32,7 @@ detect_platform() {
             ;;
         CYGWIN*|MINGW*|MSYS*)
             PLATFORM="Windows"
-            echo -e "${YELLOW}! 检测到 Windows 环境${NC}"
-            echo -e "${YELLOW}  建议使用 PowerShell 运行 run.ps1 脚本${NC}"
-            read -p "是否继续使用 Bash 脚本? (y/n): " -n 1 -r
-            echo
-            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-                exit 0
-            fi
+            echo -e "${GREEN}✓ 检测到平台: Windows (Git Bash)${NC}"
             ;;
         *)
             echo -e "${RED}✗ 未知平台: $(uname -s)${NC}"
@@ -132,27 +126,7 @@ install_xmake() {
     echo ""
 }
 
-# 构建项目
-build_project() {
-    echo -e "${BLUE}[3/4] 构建项目...${NC}"
-    echo ""
-    
-    # 清理旧的构建（可选）
-    # xmake clean -a
-    
-    # 配置项目
-    echo "配置项目..."
-    xmake config -y
-    
-    # 编译项目
-    echo ""
-    echo "编译中..."
-    xmake build -y
-    
-    echo ""
-    echo -e "${GREEN}✓ 项目构建成功${NC}"
-    echo ""
-}
+
 
 # 运行项目
 run_project() {
@@ -186,9 +160,6 @@ main() {
             exit 0
         fi
     fi
-    
-    # 构建项目
-    build_project
     
     # 运行项目
     run_project
