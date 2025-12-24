@@ -3,7 +3,6 @@ a.out
 test_sentences.txt
 build/
 .xmake
-bin/
 output.txt
 data/temp*
 data/tests/*

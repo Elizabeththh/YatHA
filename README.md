@@ -12,6 +12,7 @@
 .
 ├── LICENSE
 ├── README.md
+├── bin                           # 可执行文件
 ├── data                          # 项目数据
 ├── docs                          # 项目文档
 ├── img                           # 文档图片
@@ -40,7 +41,7 @@
 │   └── styles.css
 └── xmake.lua                     # xmake 构建脚本
 
-14 directories, 99 files
+15 directories, 99 files
 ```
 
 ### 核心特性
