@@ -123,6 +123,21 @@ bash ./run.sh
 打开 Git Bash 中提示的 URL 即可
 
 > 注意：如果要运行 Web GUI 服务，需要确保主机的 8080~8089 端口至少有一个未被占用
+> 注意：滚动分析功能需要上传的文件应为 `data` 目录下的 `input_without_query.txt` 文件。
+
+---
+## Windows 备选方案
+1. 先下载本仓库代码到本地
+2. 在项目目录打开powershell
+
+![alt text](img/pw.png)
+
+在打开的powershell中运行
+```powershell
+irm https://xmake.io/psget.text | iex
+xmake run
+```
+然后打开提示的 URL 即可
 
 --- 
 ## 运行单元测试
